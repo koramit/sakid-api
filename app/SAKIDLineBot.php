@@ -7,12 +7,12 @@ use App\Traits\DataCryptable;
 use App\Traits\AutoIdInsertable;
 use Illuminate\Database\Eloquent\Model;
 
-class SCIDLineBot extends Model implements AutoId
+class SAKIDLineBot extends Model implements AutoId
 {
     use AutoIdInsertable, DataCryptable;
 
     protected $table = 'line_bots';
-    
+
     /**
      * The attributes that are mass assignable.
      *
@@ -45,7 +45,7 @@ class SCIDLineBot extends Model implements AutoId
     {
         return $this->decryptField($this->attributes['channel_access_token']);
     }
-    
+
     /**
      * Set field 'channel_secret'.
      *

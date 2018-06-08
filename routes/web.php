@@ -16,14 +16,10 @@ $router->post('/register-user', 'UserController@store');
 $router->post('/email-verify-code', 'UserController@emailVerifyCode');
 
 // Create LINE bot
-$router->post('/line-bot', 'SCIDLineBotController@store');
-// $router->post('/line-bot', [
-//         'middleware' => 'scidGuard',
-//         'uses' => 'SCIDLineBotController@store'
-// ]);
+$router->post('/line-bot', 'SAKIDLineBotController@store');
 
 // LINE webhook
-$router->post('/line-bot/{botId}', 'SCIDLineBotController@handleWebhook');
+$router->post('/line-bot/{botId}', 'SAKIDLineBotController@handleWebhook');
 
 // Verify domain user by LINE
 $router->post('/line-verify', 'UserController@lineVerify');
