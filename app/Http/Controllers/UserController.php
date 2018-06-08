@@ -56,7 +56,7 @@ class UserController extends Controller
         }
 
         $user = $this->insertUser();
-        
+
         return config('replycodes.ok');
     }
 
@@ -80,8 +80,10 @@ class UserController extends Controller
             $user = User::where('service_domain_id', $this->domain->id)
                         ->where('name', $this->request->input('username'))
                         ->first();
-            $user->email = $this->request->input('email');
-            $user->save();
+            if ( $user->email !== $this->request->input('email') ) {
+                $user->email = $this->request->input('email');
+                $user->save();
+            }
         }
 
         // send email
@@ -90,7 +92,7 @@ class UserController extends Controller
         $data['username'] = $user->name;
         $data['email_to'] = $user->email;
         $data['code'] = $this->genVerifyCode();
-        
+
         if ( filter_var($this->domain->url, FILTER_VALIDATE_URL) ) {
             $data['url'] = $this->domain->url;
             $data['hostname'] = parse_url($this->domain->url)['host'];
@@ -98,7 +100,7 @@ class UserController extends Controller
             $data['url'] = $this->domain->name;
             $data['hostname'] = $this->domain->name;
         }
-        
+
         $companion = new Companion;
         if ( $companion->emailVerifyCode($data) ) {
             return config('replycodes.ok') + ['verify_code' => $data['code']];
@@ -144,7 +146,7 @@ class UserController extends Controller
         }
 
         $data = app('request')->all();
-        
+
         $data['name']              = app('request')->input('username');
         $data['line_bot_id']       = $domain->assignLineBot();
         $data['line_verify_code']  = $this->genVerifyCode();
@@ -157,5 +159,5 @@ class UserController extends Controller
             'line_qrcode_url'  => $user->lineBot->getQRCodeUrl(),
             'line_verify_code' => $data['line_verify_code'],
         ];
-    }    
+    }
 }
