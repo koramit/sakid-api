@@ -8,6 +8,11 @@ class Companion
 {
     protected $client;
 
+    /**
+     *
+     * Create http client
+     *
+     **/
     public function __construct()
     {
         $this->client = new Client([
@@ -16,6 +21,14 @@ class Companion
                         ]);
     }
 
+    /**
+     *
+     * Pass validated data to remote companion for
+     * sending mail verify code to domain user
+     * @param Array $data
+     * @return Boolean
+     *
+     **/
     public function emailVerifyCode($data)
     {
         $response = $this->client->post('/email-verify-code', [
