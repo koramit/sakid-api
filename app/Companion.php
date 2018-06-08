@@ -27,12 +27,13 @@ class Companion
             'form_params' => $data
         ]);
 
-        return $response->getStatusCode() == 200 ? true : false;
         if ( $response->getStatusCode() == 200 ) {
-            
-            // return json_decode($response->getBody(), true);
+            $data = json_decode($response->getBody(), true);
+            if ( $data['reply_code'] === 0 ) {
+                return true;
+            }
         }
 
-        return config('replycodes.error');
+        return false;
     }
 }
