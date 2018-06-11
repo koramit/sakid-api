@@ -17,6 +17,7 @@ class CreateUsersTable extends Migration
             $table->integer('id')->unsigned();
             $table->primary('id');
             $table->integer('service_domain_id')->unsigned()->index();
+            $table->foreign('service_domain_id')->references('id')->on('service_domains');
             $table->string('name');
             $table->string('email')->nullable();
             $table->integer('line_bot_id')->unsigned()->index();

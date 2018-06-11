@@ -17,7 +17,7 @@ class CreateLineBotsTable extends Migration
             $table->integer('id')->unsigned();
             $table->primary('id');
             $table->smallInteger('service_domain_id')->unsigned();
-            $table->foreign('admission_id')->references('id')->on('service_domains');
+            $table->foreign('service_domain_id')->references('id')->on('service_domains');
             $table->string('name');
             $table->string('qrcode_url');
             $table->string('channel_access_token', 512); // encrypt
