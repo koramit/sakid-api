@@ -12,6 +12,7 @@ class UserController extends Controller
 {
     use DomainAuthenticable, VerifyCodeGenerator;
 
+    protected $user;
     protected $domain;
     protected $request;
 
@@ -28,6 +29,15 @@ class UserController extends Controller
         $this->domain = $this->getDomain($this->request->header());
     }
 
+    protected function validInputsForEmail()
+    {
+        // validate inputs [username, email]
+        if ( !$this->request->has('username') || !filter_var($this->request->input('email'), FILTER_VALIDATE_EMAIL)) {
+            return false;
+        }
+
+        return true;
+    }
     /**
      *
      * Insert domain user
@@ -42,6 +52,41 @@ class UserController extends Controller
         return User::insert($data);
     }
 
+    protected function setUser()
+    {
+        if ( !$this->domain->willDuplicateUser($this->request->input('username')) ) {
+            $user = $this->insertUser();
+        } else {
+            $user = User::where('service_domain_id', $this->domain->id)
+                        ->where('name', $this->request->input('username'))
+                        ->first();
+            if ( $user->email !== $this->request->input('email') ) {
+                $user->email = $this->request->input('email');
+                $user->save();
+            }
+        }
+
+        $this->user = $user;
+    }
+
+    protected function setCommonEmailData()
+    {
+        // prepare data for email
+        $data['email_sender'] = $this->domain->email_sender;
+        $data['domain_name'] = $this->domain->name;
+        $data['username'] = $this->user->name;
+        $data['email_to'] = $this->user->email;
+        if ( filter_var($this->domain->url, FILTER_VALIDATE_URL) ) {
+            $data['url'] = $this->domain->url;
+            $data['hostname'] = parse_url($this->domain->url)['host'];
+        } else {
+            $data['url'] = $this->domain->name;
+            $data['hostname'] = $this->domain->name;
+        }
+
+        return $data;
+    }
+
     /**
      *
      * Store domain user
@@ -51,6 +96,10 @@ class UserController extends Controller
     **/
     public function store()
     {
+        if ( !$this->request->has('username') ) {
+            return config('replycodes.bad');
+        }
+
         if ( $this->domain->willDuplicateUser($this->request->input('username')) ) {
             return config('replycodes.duplicate_user');
         }
@@ -68,42 +117,54 @@ class UserController extends Controller
     **/
     public function emailVerifyCode()
     {
-        // validate inputs [username, email]
-        if ( !$this->request->has('username') || !filter_var($this->request->input('email'), FILTER_VALIDATE_EMAIL)) {
+        if ( !$this->validInputsForEmail() ) {
             return config('replycodes.bad');
         }
 
-        // if user not exists then create
-        if ( !$this->domain->willDuplicateUser($this->request->input('username')) ) {
-            $user = $this->insertUser();
-        } else {
-            $user = User::where('service_domain_id', $this->domain->id)
-                        ->where('name', $this->request->input('username'))
-                        ->first();
-            if ( $user->email !== $this->request->input('email') ) {
-                $user->email = $this->request->input('email');
-                $user->save();
-            }
-        }
+        $this->setUser();
 
-        // send email
-        $data['email_sender'] = $this->domain->email_sender;
-        $data['domain_name'] = $this->domain->name;
-        $data['username'] = $user->name;
-        $data['email_to'] = $user->email;
+        $data = $this->setCommonEmailData();
+
         $data['code'] = $this->genVerifyCode();
-
-        if ( filter_var($this->domain->url, FILTER_VALIDATE_URL) ) {
-            $data['url'] = $this->domain->url;
-            $data['hostname'] = parse_url($this->domain->url)['host'];
-        } else {
-            $data['url'] = $this->domain->name;
-            $data['hostname'] = $this->domain->name;
-        }
 
         $companion = new Companion;
         if ( $companion->emailVerifyCode($data) ) {
             return config('replycodes.ok') + ['verify_code' => $data['code']];
+        } else {
+            return config('replycodes.error');
+        }
+    }
+
+    /**
+     *
+     * Email LINE QRCode to domain user for verification
+     * @return Array
+     *
+    **/
+    public function emailLINEQRCode()
+    {
+        if ( !$this->validInputsForEmail() ) {
+            return config('replycodes.bad');
+        }
+
+        $this->setUser();
+
+        if ( $this->user->line_bot_id === null ) {
+            $this->user->line_bot_id = $this->domain->assignLineBot();
+        }
+
+        $this->user->line_verify_code = $this->genVerifyCode();
+        $this->user->save();
+        
+        $data = $this->setCommonEmailData();
+
+        // $bot = $this->user->lineBot;
+        $data['line_qrcode_url'] = $this->user->lineBot->qrcode_url;
+        $data['line_verify_code'] = $this->user->line_verify_code;
+
+        $companion = new Companion;
+        if ( $companion->emailLINEQRCode($data) ) {
+            return config('replycodes.ok');
         } else {
             return config('replycodes.error');
         }

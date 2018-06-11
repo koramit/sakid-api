@@ -3,7 +3,7 @@
 namespace App;
 
 use App\Contracts\AutoId;
-use App\SCIDLineBot;
+use App\SAKIDLineBot;
 use App\Traits\AutoIdInsertable;
 use App\Traits\DataCryptable;
 use App\User;
@@ -72,7 +72,7 @@ class ServiceDomain extends Model implements AutoId
 
     public function assignLineBot()
     {
-        $bot = SCIDLineBot::where('service_domain_id', $this->id)
+        $bot = SAKIDLineBot::where('service_domain_id', $this->id)
                        ->orderBy('qrcode_sent_count')
                        ->first();
                        

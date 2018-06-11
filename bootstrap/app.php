@@ -103,5 +103,6 @@ $app->router->group([
 });
 
 $app->configure('replycodes');
+$app->configure('companion');
 
 return $app;

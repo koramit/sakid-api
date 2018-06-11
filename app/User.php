@@ -26,13 +26,13 @@ class User extends Model implements AutoId
 
 
     /**
-     * Get its related App\SCIDLineBot model.
+     * Get its related App\SAKIDLineBot model.
      *
-     * @return App\SCIDLineBot
+     * @return App\SAKIDLineBot
      */
     public function lineBot()
     {
-        return $this->belongsTo('App\SCIDLineBot');
+        return $this->belongsTo('App\SAKIDLineBot');
     }
 
     /**

@@ -21,6 +21,7 @@ class SAKIDLineBot extends Model implements AutoId
     protected $fillable = [
         'id',
         'name',
+        'qrcode_url',
         'channel_secret',
         'service_domain_id',
         'channel_access_token',

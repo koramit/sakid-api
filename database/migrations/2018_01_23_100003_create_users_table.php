@@ -20,7 +20,8 @@ class CreateUsersTable extends Migration
             $table->foreign('service_domain_id')->references('id')->on('service_domains');
             $table->string('name');
             $table->string('email')->nullable();
-            $table->integer('line_bot_id')->unsigned()->index();
+            $table->integer('line_bot_id')->unsigned()->nullable()->index();
+            $table->foreign('line_bot_id')->references('id')->on('line_bots');
             $table->string('line_user_id')->nullable()->index();
             $table->string('line_display_name')->nullable();
             $table->string('line_picture_url')->nullable();

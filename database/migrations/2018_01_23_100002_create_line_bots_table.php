@@ -16,7 +16,7 @@ class CreateLineBotsTable extends Migration
         Schema::create('line_bots', function (Blueprint $table) {
             $table->integer('id')->unsigned();
             $table->primary('id');
-            $table->smallInteger('service_domain_id')->unsigned();
+            $table->integer('service_domain_id')->unsigned();
             $table->foreign('service_domain_id')->references('id')->on('service_domains');
             $table->string('name');
             $table->string('qrcode_url');
