@@ -10,7 +10,8 @@
         "vlucas/phpdotenv": "~2.2",
         "linecorp/line-bot-sdk": "^2.3",
         "rap2hpoutre/laravel-log-viewer": "^0.11.0",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.3",
+        "illuminate/redis": "5.5.*"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
