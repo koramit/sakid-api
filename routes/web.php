@@ -6,11 +6,6 @@ $router->get('/', function () use ($router) {
     return 'sakid-bot V 0.0.1 powered by lullabears.co';
 });
 
-$router->get('/test', function () use ($router) {
-    return App\User::find(1)->lineBot->qrcode_url;
-    return 'sakid-bot V 0.0.1 powered by lullabears.co';
-});
-
 // Create service domian
 $router->post('/service-domain', 'ServiceDomainController@store');
 
@@ -27,7 +22,7 @@ $router->post('/line-bot', 'SAKIDLineBotController@store');
 $router->post('/email-line-qrcode', 'UserController@emailLINEQRCode');
 
 // LINE webhook
-$router->post('/line-bot/{botId}', 'SAKIDLineBotController@handleWebhook');
+$router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
 
 // Verify domain user by LINE
 $router->post('/line-verify', 'UserController@lineVerify');
