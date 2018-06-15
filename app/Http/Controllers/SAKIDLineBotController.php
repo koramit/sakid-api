@@ -37,10 +37,11 @@ class SAKIDLineBotController extends Controller
         if ($request->has('events')) {
             try {
                 $botManager = new LINEBotManager($request->input('events'));
+                return $botManager->handleEvents(SAKIDLineBot::find($botId));
             } catch (Exception $e) {
                 return $e->getMessage();
             }
-            return $botManager->handleEvents(SAKIDLineBot::find($botId));
+
         }
 
         return null;
