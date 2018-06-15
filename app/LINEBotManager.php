@@ -17,7 +17,7 @@ class LINEBotManager
     public function __construct(&$events)
     {
         $this->events = $events;
-        Log::info(json_encode($events));
+        // Log::info(json_encode($events));
         // if ( $request->has('events') ) {
         //     $this->events = $request->input('events');
         //     Log::info(json_encode($request->input('events')));

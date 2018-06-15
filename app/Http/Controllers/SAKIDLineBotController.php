@@ -7,6 +7,7 @@ use App\SAKIDLineBot;
 // use App\ServiceDomain;
 use App\LINEBotManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SAKIDLineBotController extends Controller
 {
@@ -35,6 +36,7 @@ class SAKIDLineBotController extends Controller
     {
         // return ['code' => 0];
         if ($request->has('events')) {
+            Log::info(json_encode($request->input('events')));
             $this->events = $request->input('events');
             $botManager = new LINEBotManager($request->input('events'));
             return $botManager->handleEvents(SAKIDLineBot::find($botId));
