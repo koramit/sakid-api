@@ -3,7 +3,7 @@
 namespace App;
 
 use Exception;
-use App\LINEWebhook;
+// use App\LINEWebhook;
 use LINE\LINEBot;
 use App\LineBot as Bot;
 // use Illuminate\Http\Request;
@@ -24,7 +24,7 @@ class LINEBotManager
     public function handleEvents($bot)
     {
         $this->bot = $bot;
-        LINEWebhook::create(['body' => json_encode($this->events)]);
+
         foreach ( $this->events as $event ) {
             switch ($event['type']) {
                 case 'follow':
