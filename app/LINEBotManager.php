@@ -19,12 +19,12 @@ class LINEBotManager
     public function __construct(&$events)
     {
         $this->events = $events;
-        LINEWebhook::create(['body' => json_encode($this->events)]);
     }
 
     public function handleEvents($bot)
     {
         $this->bot = $bot;
+        LINEWebhook::create(['body' => json_encode($this->events)]);
         foreach ( $this->events as $event ) {
             switch ($event['type']) {
                 case 'follow':
