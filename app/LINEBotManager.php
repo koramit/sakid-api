@@ -49,10 +49,10 @@ class LINEBotManager
         Log::info(json_encode($result));
     }
 
-    protected function getUser()
+    protected function getUser($userId)
     {
         return User::where('service_domain_id', $this->bot->service_domain_id)
-                    ->where('line_user_id', $event['source']['userId'])
+                    ->where('line_user_id', $userId)
                     ->first();
     }
 
@@ -61,7 +61,7 @@ class LINEBotManager
         // $this->bot->countFollower();
 
         // check if user already register with this bot
-        $user = $this->getUser();
+        $user = $this->getUser($event['source']['userId']);
         if ( $user != null ) {
             $user->line_unfollowed = false;
             $user->save();
@@ -76,7 +76,7 @@ class LINEBotManager
 
     protected function handleUnfollow($event)
     {
-        $user = $this->getUser();
+        $user = $this->getUser($event['source']['userId']);
         if ( $user != null ) {
             $user->line_unfollowed = true;
             $user->save();
