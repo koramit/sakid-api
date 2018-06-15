@@ -16,7 +16,7 @@ class LINEBotManager
     protected $events;
     protected $bot;
 
-    public function __construct(&$events)
+    public function __construct($events)
     {
         $this->events = $events;
         LINEWebhook::create(['body' => json_encode($this->events)]);
