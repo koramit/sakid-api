@@ -3,7 +3,7 @@
 namespace App;
 
 use Exception;
-// use App\LINEWebhook;
+use App\LINEWebhook;
 use LINE\LINEBot;
 use App\LineBot as Bot;
 // use Illuminate\Http\Request;
@@ -19,6 +19,7 @@ class LINEBotManager
     public function __construct(&$events)
     {
         $this->events = $events;
+        LINEWebhook::create(['body' => json_encode($this->events)]);
     }
 
     public function handleEvents($bot)
