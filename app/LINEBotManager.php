@@ -29,11 +29,7 @@ class LINEBotManager
         foreach ( $this->events as $event ) {
             switch ($event['type']) {
                 case 'follow':
-                    try {
-                        $result = $this->handleFollow($event);
-                    } catch (Exception $e) {
-                        LINEWebhook::create(['body' => $e->getMessage()]);
-                    }
+                    $result = $this->handleFollow($event);
                     break;
 
                 case 'unfollow':
