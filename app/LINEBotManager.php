@@ -14,19 +14,22 @@ use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 class LINEBotManager
 {
     protected $events;
+    protected $user;
     protected $bot;
 
-    public function __construct($events)
+    public function __construct($events, $bot)
     {
         $this->events = $events;
         LINEWebhook::create(['body' => json_encode($this->events)]);
+        $this->user = $this->getUser($events[0]['source']['userId']);
+        $this->bot = $bot;
     }
 
     public function handleEvents($bot)
     {
-        $this->bot = $bot;
-
+        // $this->bot = $bot;
         foreach ( $this->events as $event ) {
+
             switch ($event['type']) {
                 case 'follow':
                     $result = $this->handleFollow($event);
@@ -58,8 +61,6 @@ class LINEBotManager
 
     protected function handleFollow($event)
     {
-        // $this->bot->countFollower();
-
         // check if user already register with this bot
         $user = $this->getUser($event['source']['userId']);
         if ( $user != null ) {
@@ -70,7 +71,7 @@ class LINEBotManager
             $this->bot->countFollower();
         }
 
-        // push LINE followed message ** TESTED **
+        // push LINE followed message
         return $this->pushMessage($this->bot->domain->line_follow_message, $event['source']['userId']);
     }
 
@@ -88,6 +89,8 @@ class LINEBotManager
 
     protected function handleMessage($event)
     {
+        $user = $this->getUser($event['source']['userId']);
+
         switch ($event['message']['type']) {
             case 'text':
                 if ( $this->isVerifyCodeMessage($event['source']['userId'], $event['message']['text']) ) {
