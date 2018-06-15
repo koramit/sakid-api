@@ -35,8 +35,8 @@ class SAKIDLineBotController extends Controller
     public function handleWebhook($botId, Request $request)
     {
         if ($request->has('events')) {
-            return 'has events';
-            // LINEWebhook::create(['body' => $request->input('events')]);
+            // return 'has events';
+            LINEWebhook::create(['body' => json_encode($request->input('events'))]);
             // $botManager = new LINEBotManager($request->input('events'));
             // return $botManager->handleEvents(SAKIDLineBot::find($botId));
         }
