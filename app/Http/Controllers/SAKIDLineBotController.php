@@ -36,11 +36,11 @@ class SAKIDLineBotController extends Controller
     {
         if ($request->has('events')) {
             LINEWebhook::create(['body' => $request->input('events')]);
-            $botManager = new LINEBotManager($request->input('events'));
-            return $botManager->handleEvents(SAKIDLineBot::find($botId));
+            // $botManager = new LINEBotManager($request->input('events'));
+            // return $botManager->handleEvents(SAKIDLineBot::find($botId));
         }
 
-        return null;
+        // return null;
         // return (new LINEBotManager($request))->handleEvents(SAKIDLineBot::find($botId));
     }
 }
