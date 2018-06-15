@@ -27,6 +27,11 @@ $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook
 $router->get('/mongfat', function () use ($router) {
     return App\LINEWebhook::orderBy('id', 'desc')->get();
 });
+$router->get('/mongdel', function () use ($router) {
+    App\User::truncate();
+    App\LINEWebhook::truncate();
+    return 'done';
+});
 // Verify domain user by LINE
 $router->post('/line-verify', 'UserController@lineVerify');
 // $router->post('/line-verify', [
