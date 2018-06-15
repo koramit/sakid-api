@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Exception;
+use App\LINEWebhook;
 use LINE\LINEBot;
 use App\LineBot as Bot;
 // use Illuminate\Http\Request;
@@ -17,11 +19,7 @@ class LINEBotManager
     public function __construct(&$events)
     {
         $this->events = $events;
-        // Log::info(json_encode($events));
-        // if ( $request->has('events') ) {
-        //     $this->events = $request->input('events');
-        //     Log::info(json_encode($request->input('events')));
-        // }
+        LINEWebhook::create(['body' => json_encode($this->events)]);
     }
 
     public function handleEvents($bot)
@@ -30,7 +28,11 @@ class LINEBotManager
         foreach ( $this->events as $event ) {
             switch ($event['type']) {
                 case 'follow':
-                    $result = $this->handleFollow($event);
+                    try {
+                        $result = $this->handleFollow($event);
+                    } catch (Exception $e) {
+                        LINEWebhook::create(['body' => $e->getMessage()]);
+                    }
                     break;
 
                 case 'unfollow':
@@ -66,7 +68,7 @@ class LINEBotManager
         if ( $user != null ) {
             $user->line_unfollowed = false;
             $user->save();
-            return $this->pushMessage('กลัับมาทำไม ฉันลืมเธอไปหมดแล้ว', $event['source']['userId']);
+            return $this->pushMessage('กลับมาทำไม ฉันลืมเธอไปหมดแล้ว', $event['source']['userId']);
         } else {
             $this->bot->countFollower();
         }
