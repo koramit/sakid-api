@@ -19,13 +19,13 @@ class LINEBotManager
 
     public function __construct($events, $bot)
     {
-        $this->events = $events;
-        LINEWebhook::create(['body' => json_encode($this->events)]);
-        $this->user = $this->getUser($events[0]['source']['userId']);
         $this->bot = $bot;
+        $this->events = $events;
+        $this->user = $this->getUser($events[0]['source']['userId']);
+        LINEWebhook::create(['body' => json_encode($this->events)]);
     }
 
-    public function handleEvents($bot)
+    public function handleEvents()
     {
         // $this->bot = $bot;
         foreach ( $this->events as $event ) {
