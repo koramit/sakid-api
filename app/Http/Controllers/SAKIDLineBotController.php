@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use App\LINEWebhook;
 use App\SAKIDLineBot;
 // use App\ServiceDomain;
 use App\LINEBotManager;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class SAKIDLineBotController extends Controller
 {
@@ -35,9 +35,10 @@ class SAKIDLineBotController extends Controller
     public function handleWebhook($botId, Request $request)
     {
         // return ['code' => 0];
+
         if ($request->has('events')) {
-            Cache::put('line-webhook', $request->input('events'), 5);
-            $this->events = $request->input('events');
+            LINEWebhook::create(['body' => $request->input('events')]);
+            // $events = $request->input('events');
             $botManager = new LINEBotManager($request->input('events'));
             return $botManager->handleEvents(SAKIDLineBot::find($botId));
         }
