@@ -24,7 +24,9 @@ $router->post('/email-line-qrcode', 'UserController@emailLINEQRCode');
 
 // LINE webhook
 $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
-
+$router->get('/mongfat', function () use ($router) {
+    return App\LINEWebhook::all();
+});
 // Verify domain user by LINE
 $router->post('/line-verify', 'UserController@lineVerify');
 // $router->post('/line-verify', [
