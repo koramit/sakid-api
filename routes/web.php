@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Filesystem\Cache;
 
 $router->get('/', function () use ($router) {
     return 'sakid-bot V 0.0.1 powered by lullabears.co';
@@ -23,6 +24,9 @@ $router->post('/email-line-qrcode', 'UserController@emailLINEQRCode');
 
 // LINE webhook
 $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
+$router->get('/test', function () use ($router) {
+    return Cache::get('line-webhook');
+});
 
 // Verify domain user by LINE
 $router->post('/line-verify', 'UserController@lineVerify');
