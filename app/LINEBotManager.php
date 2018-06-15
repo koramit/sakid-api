@@ -2,25 +2,25 @@
 
 namespace App;
 
+use LINE\LINEBot;
 use App\LineBot as Bot;
-use Illuminate\Http\Request;
+// use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
-use \LINE\LINEBot;
-use \LINE\LINEBot\HTTPClient\CurlHTTPClient;
-
 
 class LINEBotManager
 {
     protected $events;
     protected $bot;
 
-    public function __construct(Request &$request)
+    public function __construct(&$events)
     {
-        if ( $request->has('events') ) {
-            $this->events = $request->input('events');
-            Log::info(json_encode($request->input('events')));
-        }
+        $this->events = $events;
+        // if ( $request->has('events') ) {
+        //     $this->events = $request->input('events');
+        //     Log::info(json_encode($request->input('events')));
+        // }
     }
 
     public function handleEvents($bot)
@@ -31,7 +31,7 @@ class LINEBotManager
                 case 'follow':
                     $result = $this->handleFollow($event);
                     break;
-                
+
                 case 'unfollow':
                     $result = $this->handleUnfollow($event);
                     break;
@@ -49,31 +49,35 @@ class LINEBotManager
         Log::info(json_encode($result));
     }
 
-    protected function handleFollow($event)
+    protected function getUser()
     {
-        $this->bot->countFollower();
-
-        $user = User::where('service_domain_id', $this->bot->service_domain_id)
+        return User::where('service_domain_id', $this->bot->service_domain_id)
                     ->where('line_user_id', $event['source']['userId'])
                     ->first();
+    }
 
-        if ( $user != null ) { // this line_user_id already verified with this domain
+    protected function handleFollow($event)
+    {
+        // $this->bot->countFollower();
+
+        // check if user already register with this bot
+        $user = $this->getUser();
+        if ( $user != null ) {
             $user->line_unfollowed = false;
             $user->save();
             return $this->pushMessage('กลัับมาทำไม ฉันลืมเธอไปหมดแล้ว', $event['source']['userId']);
+        } else {
+            $this->bot->countFollower();
         }
-        
-        // show LINE first follow message ** TESTED **
+
+        // push LINE followed message ** TESTED **
         return $this->pushMessage($this->bot->domain->line_follow_message, $event['source']['userId']);
     }
 
     protected function handleUnfollow($event)
     {
-        $user = User::where('service_domain_id', $this->bot->service_domain_id)
-                    ->where('line_user_id', $event['source']['userId'])
-                    ->first();
-        
-        if ( $user != null ) {            
+        $user = $this->getUser();
+        if ( $user != null ) {
             $user->line_unfollowed = true;
             $user->save();
         }
@@ -92,7 +96,7 @@ class LINEBotManager
                     break; // no action for now
                 }
 
-                // in case wrong verify code 
+                // in case wrong verify code
                 if ( is_numeric($event['message']['text']) && (strlen($event['message']['text']) == 6) ) {
                     $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
                     break;
@@ -107,17 +111,49 @@ class LINEBotManager
                     Log::info('Callback => ' . json_encode($response));
                 }
                 break;
-            
+
             default:
                 break;
         }
         return ['handle message'];
     }
 
-    protected function getUserProfile($userId)
+    protected function makeLINEBot()
     {
         $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
-        $bot = new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
+        return new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
+    }
+
+    protected function pushMessage($sms, $userId)
+    {
+        // $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
+        // $bot = new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
+        $bot = $this->makeLINEBot();
+
+        $textMessageBuilder = new TextMessageBuilder($sms);
+        $response = $bot->pushMessage($userId, $textMessageBuilder);
+
+        return $response;
+    }
+
+    protected function replyMessage($sms, $replyToken)
+    {
+        // $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
+        // $bot = new \LINE\LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
+        $bot = $this->makeLINEBot();
+
+        $textMessageBuilder = new TextMessageBuilder($sms);
+        $response = $bot->replyMessage($replyToken, $textMessageBuilder);
+
+        return $response;
+    }
+
+    protected function getUserProfile($userId)
+    {
+        // $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
+        // $bot = new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
+        $bot = $this->makeLINEBot();
+
         $response = $bot->getProfile($userId);
         Log::info('$response->isSucceeded() => ' . $response->isSucceeded());
         if ($response->isSucceeded()) {
@@ -130,38 +166,24 @@ class LINEBotManager
         return $this->bot;
     }
 
-    protected function pushMessage($sms, $userId)
-    {
-        $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
-        $bot = new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
-
-        $textMessageBuilder = new TextMessageBuilder($sms);
-        $response = $bot->pushMessage($userId, $textMessageBuilder);
-
-        return $response;
-    }
-
-    protected function replyMessage($sms, $replyToken)
-    {
-        $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
-        $bot = new \LINE\LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
-
-        $textMessageBuilder = new TextMessageBuilder($sms);
-        $response = $bot->replyMessage($replyToken, $textMessageBuilder);
-
-        return $response;
-    }
-
     protected function isVerifyCodeMessage($userId, $verifyCode)
     {
         if ( !is_numeric($verifyCode) || (strlen($verifyCode) != 6) ) {
             return false;
         }
 
-        $user = User::where('service_domain_id', $this->bot->service_domain_id)
-                    ->where('line_bot_id', $this->bot->id)
-                    ->whereNull('line_user_id')
-                    ->where('line_verify_code', $verifyCode)
+        // $user = User::where('service_domain_id', $this->bot->service_domain_id)
+        //             ->where('line_bot_id', $this->bot->id)
+        //             ->whereNull('line_user_id')
+        //             ->where('line_verify_code', $verifyCode)
+        //             ->first();
+
+        $user = User::where([
+                        'line_user_id' => null,
+                        'service_domain_id' => $this->bot->service_domain_id,
+                        'line_bot_id' => $this->bot->id,
+                        'line_verify_code' => $verifyCode
+                    ])
                     ->first();
 
         if ( $user == null ) {

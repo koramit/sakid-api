@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\SAKIDLineBot;
-use App\ServiceDomain;
+// use App\ServiceDomain;
 use App\LINEBotManager;
 use Illuminate\Http\Request;
 
@@ -33,7 +33,12 @@ class SAKIDLineBotController extends Controller
 
     public function handleWebhook($botId, Request $request)
     {
-        return ['code' => 0];
-        return (new LINEBotManager($request))->handleEvents(SAKIDLineBot::find($botId));
+        // return ['code' => 0];
+        if ($request->has('events')) {
+            $this->events = $request->input('events');
+            $botManager = new LINEBotManager($request->input('events'));
+            $botManager->handleEvents(SAKIDLineBot::find($botId));
+        }
+        // return (new LINEBotManager($request))->handleEvents(SAKIDLineBot::find($botId));
     }
 }
