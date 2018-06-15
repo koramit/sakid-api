@@ -27,9 +27,7 @@ class LINEBotManager
 
     public function handleEvents()
     {
-        // $this->bot = $bot;
         foreach ( $this->events as $event ) {
-
             switch ($event['type']) {
                 case 'follow':
                     $result = $this->handleFollow($event);
@@ -62,10 +60,10 @@ class LINEBotManager
     protected function handleFollow($event)
     {
         // check if user already register with this bot
-        $user = $this->getUser($event['source']['userId']);
-        if ( $user != null ) {
-            $user->line_unfollowed = false;
-            $user->save();
+        // $user = $this->getUser($event['source']['userId']);
+        if ( $this->user != null ) {
+            $this->user->line_unfollowed = false;
+            $this->user->save();
             return $this->pushMessage('กลับมาทำไม ฉันลืมเธอไปหมดแล้ว', $event['source']['userId']);
         } else {
             $this->bot->countFollower();
@@ -77,10 +75,10 @@ class LINEBotManager
 
     protected function handleUnfollow($event)
     {
-        $user = $this->getUser($event['source']['userId']);
-        if ( $user != null ) {
-            $user->line_unfollowed = true;
-            $user->save();
+        // $user = $this->getUser($event['source']['userId']);
+        if ( $this->user != null ) {
+            $this->user->line_unfollowed = true;
+            $this->user->save();
         }
 
         $this->bot->discountFollower();
@@ -89,34 +87,40 @@ class LINEBotManager
 
     protected function handleMessage($event)
     {
-        $user = $this->getUser($event['source']['userId']);
+        if ( ($this->user !== null) || (
+                $event['message']['type'] == 'text' &&
+                is_numeric($event['message']['text']) &&
+                (strlen($event['message']['text']) == 6)
+        )) {
+            switch ($event['message']['type']) {
+                case 'text':
+                    if ( $this->isVerifyCodeMessage($event['source']['userId'], $event['message']['text']) ) {
+                        $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
 
-        switch ($event['message']['type']) {
-            case 'text':
-                if ( $this->isVerifyCodeMessage($event['source']['userId'], $event['message']['text']) ) {
-                    $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
+                        break; // no action for now
+                    }
 
-                    break; // no action for now
-                }
+                    // in case wrong verify code
+                    if ( is_numeric($event['message']['text']) && (strlen($event['message']['text']) == 6) ) {
+                        $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
+                        break;
+                    }
 
-                // in case wrong verify code
-                if ( is_numeric($event['message']['text']) && (strlen($event['message']['text']) == 6) ) {
-                    $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
+                    // check if client provide callback function
+                    $user = User::where('service_domain_id', $this->bot->service_domain_id)
+                                        ->where('line_user_id', $event['source']['userId'])
+                                        ->first();
+                    if ( $user != null ) {
+                        $response = $this->bot->domain->sendCallback($user->name, $event['message']['text']);
+                        Log::info('Callback => ' . json_encode($response));
+                    }
                     break;
-                }
 
-                // check if client provide callback function
-                $user = User::where('service_domain_id', $this->bot->service_domain_id)
-                                    ->where('line_user_id', $event['source']['userId'])
-                                    ->first();
-                if ( $user != null ) {
-                    $response = $this->bot->domain->sendCallback($user->name, $event['message']['text']);
-                    Log::info('Callback => ' . json_encode($response));
-                }
-                break;
-
-            default:
-                break;
+                default:
+                    break;
+            }
+        } else {
+            $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
         }
         return ['handle message'];
     }
