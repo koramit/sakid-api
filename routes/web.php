@@ -26,7 +26,7 @@ $router->post('/email-line-qrcode', 'UserController@emailLINEQRCode');
 $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
 
 $router->get('/mongfat', function () use ($router) {
-    return App\LINEEvent::with('lineBot')->orderBy('id', 'desc')->get();
+    return App\LINEEvent::orderBy('id', 'desc')->get();
 });
 $router->get('/mongdel', function () use ($router) {
     App\User::truncate();

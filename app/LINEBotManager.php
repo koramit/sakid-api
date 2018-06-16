@@ -21,14 +21,6 @@ class LINEBotManager
     {
         $this->events = $events;
         $this->bot = \App\SAKIDLineBot::find($botId);
-        // $this->user = $this->getUser($events[0]['source']['userId']);
-    }
-
-    protected function getUser($userId)
-    {
-        return User::where('service_domain_id', $this->bot->service_domain_id)
-                    ->where('line_user_id', $userId)
-                    ->first();
     }
 
     public function handleEvents()
@@ -90,7 +82,7 @@ class LINEBotManager
         }
 
         $this->bot->discountFollower();
-        return ['handle unfollow'];
+        return true;
     }
 
     protected function handleMessage($event)
@@ -106,7 +98,6 @@ class LINEBotManager
                 }
                 return true;
             }
-            // return ['handle message'];
         }
 
         if (
@@ -114,14 +105,13 @@ class LINEBotManager
                 is_numeric($event['message']['text']) && // text = numeric
                 (strlen($event['message']['text']) == 6) // text-length = 6
            ) {
+            $this->event->action_code = 4;
             if ( $this->isVerifyCodeMessage($event['source']['userId'], $event['message']['text']) ) {
                 return $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
-                // return ['handle message'];
             }
         }
 
         return $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
-        // return ['handle message'];
     }
 
     protected function makeLINEBot()
@@ -173,7 +163,7 @@ class LINEBotManager
             return $profile;
         }
 
-        return $this->bot;
+        return false;
     }
 
     protected function isVerifyCodeMessage($userId, $verifyCode)
@@ -191,8 +181,19 @@ class LINEBotManager
         }
 
         $user->line_user_id = $userId;
+        $user->save();
 
+        return $this->updateUserProfile($user);
+    }
+
+    public function updateUserProfile($user)
+    {
         $profile = $this->getUserProfile($user->line_user_id);
+        
+        if ( $profile === false ) {
+            return false;
+        }
+
         if (array_key_exists('displayName', $profile)) {
             $user->line_display_name = $profile['displayName'];
         }
@@ -202,8 +203,7 @@ class LINEBotManager
         if (array_key_exists('statusMessage', $profile)) {
             $user->line_status_message = $profile['statusMessage'];
         }
-        $user->save();
 
-        return true;
+        return $user->save();
     }
 }
