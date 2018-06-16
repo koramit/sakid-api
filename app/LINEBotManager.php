@@ -40,8 +40,8 @@ class LINEBotManager
                               ->first();
 
             $this->event = LINEEvent::insert([
+                'line_bot_id' => $this->bot->id,
                 'payload' => json_encode($event),
-                'sakid_line_bot_id' => $this->bot->id,
                 'userId'  => $event['source']['userId']
             ]);
             
