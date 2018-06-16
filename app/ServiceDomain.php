@@ -108,5 +108,6 @@ class ServiceDomain extends Model implements AutoId
 
             return ['text' => 'request failed'];
         }
+        return ['text' => 'no callback'];
     }
 }
