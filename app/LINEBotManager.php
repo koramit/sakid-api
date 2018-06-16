@@ -5,7 +5,7 @@ namespace App;
 use Exception;
 use App\LINEWebhook;
 use LINE\LINEBot;
-use App\LineBot as Bot;
+// use App\LineBot as Bot;
 // use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
@@ -17,10 +17,10 @@ class LINEBotManager
     protected $user;
     protected $bot;
 
-    public function __construct($events, $bot)
+    public function __construct($events, $botId)
     {
-        $this->bot = $bot;
         $this->events = $events;
+        $this->bot = \App\SAKIDLineBot::find($botId);
         $this->user = $this->getUser($events[0]['source']['userId']);
         LINEWebhook::create(['body' => json_encode($this->events)]);
     }
