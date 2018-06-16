@@ -12,5 +12,8 @@ class LINEWebhook extends Model implements AutoId
 
     protected $table = 'line_webhooks';
 
-    protected $fillable = ['payload'];
+    protected $fillable = [
+        'id',
+        'payload'
+    ];
 }
