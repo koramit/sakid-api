@@ -11,6 +11,7 @@ use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 
 class LINEBotManager
 {
+    protected $webhook;
     protected $events;
     protected $user;
     protected $bot;
@@ -20,7 +21,7 @@ class LINEBotManager
         $this->events = $events;
         $this->bot = \App\SAKIDLineBot::find($botId);
         $this->user = $this->getUser($events[0]['source']['userId']);
-        LINEWebhook::create(['body' => json_encode($this->events)]);
+        $this->webhook = LINEWebhook::insert(['payload' => json_encode($this->events)]);
     }
 
     public function handleEvents()
