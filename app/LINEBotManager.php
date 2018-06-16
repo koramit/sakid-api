@@ -21,12 +21,12 @@ class LINEBotManager
         $this->events = $events;
         $this->bot = \App\SAKIDLineBot::find($botId);
         $this->user = $this->getUser($events[0]['source']['userId']);
-        $this->webhook = LINEWebhook::insert(['payload' => json_encode($this->events)]);
     }
 
     public function handleEvents()
     {
         foreach ( $this->events as $event ) {
+            $this->webhook = LINEWebhook::insert(['payload' => json_encode($event)]);
             switch ($event['type']) {
                 case 'follow':
                     $result = $this->handleFollow($event);
