@@ -21,7 +21,7 @@ class LINEBotManager
     {
         $this->events = $events;
         $this->bot = \App\SAKIDLineBot::find($botId);
-        $this->user = $this->getUser($events[0]['source']['userId']);
+        // $this->user = $this->getUser($events[0]['source']['userId']);
     }
 
     protected function getUser($userId)
@@ -34,7 +34,17 @@ class LINEBotManager
     public function handleEvents()
     {
         foreach ( $this->events as $event ) {
-            $this->event = LINEEvent::insert(['payload' => json_encode($event)]);
+            
+            $this->user = User::where('service_domain_id', $this->bot->service_domain_id)
+                              ->where('line_user_id', $event['source']['userId'])
+                              ->first();
+
+            $this->event = LINEEvent::insert([
+                'payload' => json_encode($event),
+                'sakid_line_bot_id' => $this->bot->id,
+                'userId'  => $event['source']['userId']
+            ]);
+            
             switch ($event['type']) {
                 case 'follow':
                     $result = $this->handleFollow($event);
@@ -89,6 +99,7 @@ class LINEBotManager
             if ( $event['message']['type'] == 'text' ) {
                 $response = $this->bot->domain->sendCallback($user->name, $event['message']['text']);
                 
+                $this->event->action_code = 1;
                 $this->event->response_code = $response['code'];
                 if ( $this->event->response_code > 1 ) {
                     return false;
@@ -137,6 +148,7 @@ class LINEBotManager
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $bot->pushMessage($userId, $textMessageBuilder);
 
+        $this->event->action_code = 2;
         return $this->handleResponse($response);
     }
 
@@ -147,6 +159,7 @@ class LINEBotManager
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $bot->replyMessage($replyToken, $textMessageBuilder);
 
+        $this->event->action_code = 3;
         return $this->handleResponse($response);
     }
 

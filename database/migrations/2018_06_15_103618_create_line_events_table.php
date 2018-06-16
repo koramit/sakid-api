@@ -16,9 +16,12 @@ class CreateLineEventsTable extends Migration
         Schema::create('line_events', function (Blueprint $table) {
             $table->integer('id')->unsigned();
             $table->primary('id');
+            $table->integer('line_bot_id')->unsigned();
+            $table->foreign('line_bot_id')->references('id')->on('line_bots');
             $table->text('payload');
             $table->boolean('handleable')->default(false);
-            $table->smallInteger('response_code')->unsigned()->nullable();
+            $table->tinyInteger('action_code')->unsigned()->index()->nullable();
+            $table->smallInteger('response_code')->unsigned()->index()->nullable();
             $table->timestamps();
         });
     }

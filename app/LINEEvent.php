@@ -14,6 +14,17 @@ class LINEEvent extends Model implements AutoId
 
     protected $fillable = [
         'id',
+        'line_bot_id',
         'payload'
     ];
+
+    /**
+     * Get its related App\SAKIDLineBot model.
+     *
+     * @return App\SAKIDLineBot
+     */
+    public function lineBot()
+    {
+        return $this->belongsTo('App\SAKIDLineBot');
+    }
 }
