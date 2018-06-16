@@ -18,6 +18,7 @@ class CreateLineEventsTable extends Migration
             $table->primary('id');
             $table->text('payload');
             $table->boolean('handleable')->default(false);
+            $table->smallInteger('response_code')->unsigned()->nullable();
             $table->timestamps();
         });
     }

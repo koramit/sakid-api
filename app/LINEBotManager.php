@@ -4,15 +4,16 @@ namespace App;
 
 use Exception;
 use LINE\LINEBot;
-use App\LINEWebhook;
+use App\LINEEvent;
 use Illuminate\Support\Facades\Log;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 
 class LINEBotManager
 {
-    protected $webhook;
+    
     protected $events;
+    protected $event;
     protected $user;
     protected $bot;
 
@@ -33,7 +34,7 @@ class LINEBotManager
     public function handleEvents()
     {
         foreach ( $this->events as $event ) {
-            $this->webhook = LINEWebhook::insert(['payload' => json_encode($event)]);
+            $this->event = LINEEvent::insert(['payload' => json_encode($event)]);
             switch ($event['type']) {
                 case 'follow':
                     $result = $this->handleFollow($event);
@@ -51,8 +52,8 @@ class LINEBotManager
                     $result = false;
                     break;
             }
-            $this->webhook->handleable = $result;
-            $this->webhook->save();
+            $this->event->handleable = $result;
+            $this->event->save();
         }
     }
 
@@ -87,8 +88,14 @@ class LINEBotManager
         if ( $this->user !== null ) { // service user
             if ( $event['message']['type'] == 'text' ) {
                 $response = $this->bot->domain->sendCallback($user->name, $event['message']['text']);
+                
+                $this->event->response_code = $response['code'];
+                if ( $this->event->response_code > 1 ) {
+                    return false;
+                }
+                return true;
             }
-            return ['handle message'];
+            // return ['handle message'];
         }
 
         if (
@@ -97,19 +104,30 @@ class LINEBotManager
                 (strlen($event['message']['text']) == 6) // text-length = 6
            ) {
             if ( $this->isVerifyCodeMessage($event['source']['userId'], $event['message']['text']) ) {
-                $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
-                return ['handle message'];
+                return $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
+                // return ['handle message'];
             }
         }
 
-        $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
-        return ['handle message'];
+        return $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
+        // return ['handle message'];
     }
 
     protected function makeLINEBot()
     {
         $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
         return new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
+    }
+
+    protected function handleResponse(&$response)
+    {
+        $this->event->response_code = $response->getHTTPStatus();
+
+        if ( $this->event->response_code == 200 ) {
+            return true;
+        }
+
+        return false;
     }
 
     protected function pushMessage($sms, $userId)
@@ -119,7 +137,7 @@ class LINEBotManager
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $bot->pushMessage($userId, $textMessageBuilder);
 
-        return $response;
+        return $this->handleResponse($response);
     }
 
     protected function replyMessage($sms, $replyToken)
@@ -129,7 +147,7 @@ class LINEBotManager
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $bot->replyMessage($replyToken, $textMessageBuilder);
 
-        return $response;
+        return $this->handleResponse($response);
     }
 
     protected function getUserProfile($userId)

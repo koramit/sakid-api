@@ -103,11 +103,11 @@ class ServiceDomain extends Model implements AutoId
             ]);
 
             if ( $response->getStatusCode() == 200 ) {
-                return ['text' => 'OK'];
+                return ['code' => 1]; // OK
             }
 
-            return ['text' => 'request failed'];
+            return ['code' => 2]; // error
         }
-        return ['text' => 'no callback'];
+        return ['code' => 0]; // no callback
     }
 }
