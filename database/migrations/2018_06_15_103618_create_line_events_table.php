@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateLineWebhooksTable extends Migration
+class CreateLineEventsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateLineWebhooksTable extends Migration
      */
     public function up()
     {
-        Schema::create('line_webhooks', function (Blueprint $table) {
+        Schema::create('line_events', function (Blueprint $table) {
             $table->integer('id')->unsigned();
             $table->primary('id');
             $table->text('payload');
@@ -29,6 +29,6 @@ class CreateLineWebhooksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('line_webhooks');
+        Schema::dropIfExists('line_events');
     }
 }

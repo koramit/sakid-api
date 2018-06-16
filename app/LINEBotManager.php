@@ -23,6 +23,13 @@ class LINEBotManager
         $this->user = $this->getUser($events[0]['source']['userId']);
     }
 
+    protected function getUser($userId)
+    {
+        return User::where('service_domain_id', $this->bot->service_domain_id)
+                    ->where('line_user_id', $userId)
+                    ->first();
+    }
+
     public function handleEvents()
     {
         foreach ( $this->events as $event ) {
@@ -44,14 +51,9 @@ class LINEBotManager
                     $result = false;
                     break;
             }
+            $this->webhook->handleable = $result;
+            $this->webhook->save();
         }
-    }
-
-    protected function getUser($userId)
-    {
-        return User::where('service_domain_id', $this->bot->service_domain_id)
-                    ->where('line_user_id', $userId)
-                    ->first();
     }
 
     protected function handleFollow($event)
