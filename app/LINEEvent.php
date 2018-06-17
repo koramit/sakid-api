@@ -14,8 +14,8 @@ class LINEEvent extends Model implements AutoId
 
     protected $fillable = [
         'id',
+        'payload',
         'line_bot_id',
-        'payload'
     ];
 
     /**
