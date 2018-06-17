@@ -11,18 +11,29 @@ use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 
 class LINEBotManager
 {
-    protected $botClient;
-    protected $events;
-    protected $event;
-    protected $user;
-    protected $bot;
+    protected $bot;         // sakid LINE bot
+    protected $user;        // sakid user
+    protected $event;       // LINE event
+    protected $events;      // LINE events
+    protected $botClient;   // LINEBot client for LINE platform
 
+    /**
+     *
+     * Initiate instance
+     * @param array $events, integer $botId
+     *
+    */
     public function __construct($events, $botId)
     {
         $this->events = $events;
         $this->bot = \App\SAKIDLineBot::find($botId);
     }
 
+    /**
+     *
+     * Handle LINE events from webhook
+     * 
+    */
     public function handleEvents()
     {
         foreach ( $this->events as $event ) {
