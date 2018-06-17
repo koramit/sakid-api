@@ -148,7 +148,7 @@ class LINEBotManager
 
     protected function replyMessage($sms, $replyToken)
     {
-        $bot = $this->makeLINEBot();
+        // $bot = $this->makeLINEBot();
 
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $this->botClient->replyMessage($replyToken, $textMessageBuilder);
@@ -159,7 +159,7 @@ class LINEBotManager
 
     protected function getUserProfile($userId)
     {
-        $bot = $this->makeLINEBot();
+        // $bot = $this->makeLINEBot();
 
         $response = $this->botClient->getProfile($userId);
         if ($response->isSucceeded()) {
