@@ -110,19 +110,13 @@ class LINEBotManager
                 (strlen($event['message']['text']) == 6) // text-length = 6
            ) {
             $this->event->action_code = 4; // verification
-            if ( $this->isVerifyCodeMessage($event['source']['userId'], $event['message']['text']) ) {
+            if ( $this->tryVerify($event['source']['userId'], $event['message']['text']) ) {
                 return $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
             }
         }
 
         return $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
     }
-
-    // protected function makeLINEBot()
-    // {
-    //     $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
-    //     return new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
-    // }
 
     protected function handleResponse(&$response)
     {
@@ -137,8 +131,6 @@ class LINEBotManager
 
     protected function pushMessage($sms, $userId)
     {
-        // $bot = $this->makeLINEBot();
-
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $this->botClient->pushMessage($userId, $textMessageBuilder);
 
@@ -148,8 +140,6 @@ class LINEBotManager
 
     protected function replyMessage($sms, $replyToken)
     {
-        // $bot = $this->makeLINEBot();
-
         $textMessageBuilder = new TextMessageBuilder($sms);
         $response = $this->botClient->replyMessage($replyToken, $textMessageBuilder);
 
@@ -159,8 +149,6 @@ class LINEBotManager
 
     protected function getUserProfile($userId)
     {
-        // $bot = $this->makeLINEBot();
-
         $response = $this->botClient->getProfile($userId);
         if ($response->isSucceeded()) {
             $profile = $response->getJSONDecodedBody();
@@ -170,7 +158,7 @@ class LINEBotManager
         return false;
     }
 
-    protected function isVerifyCodeMessage($userId, $verifyCode)
+    protected function tryVerify($userId, $verifyCode)
     {
         $user = User::where([
                         'line_user_id' => null,
