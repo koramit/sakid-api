@@ -5,7 +5,7 @@ namespace App;
 use Exception;
 use LINE\LINEBot;
 use App\LINEEvent;
-use Illuminate\Support\Facades\Log;
+use Ap\SAKIDLineBot;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 
@@ -20,13 +20,14 @@ class LINEBotManager
     /**
      *
      * Initiate instance
-     * @param array $events, integer $botId
+     * @param array $events
+     * @param integer $botId
      *
     */
     public function __construct($events, $botId)
     {
         $this->events = $events;
-        $this->bot = \App\SAKIDLineBot::find($botId);
+        $this->bot = SAKIDLineBot::find($botId);
     }
 
     /**
@@ -49,6 +50,7 @@ class LINEBotManager
                 'userId'  => $event['source']['userId']
             ]);
 
+            // if not unfollow event then initiate LINE bot client
             if ( $event['type'] != 'unfollow' ) {
                 $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
                 $this->botClient = new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
@@ -74,12 +76,21 @@ class LINEBotManager
         }
     }
 
+    /**
+     *
+     * Handle follow event. This trigger by scan qrcode or unblocked
+     * @param array $event
+     * @return boolean
+     *
+     */
     protected function handleFollow($event)
     {
-        // check if user already register with this bot
+        // check if event trigger by user unblocked bot
         if ( $this->user != null ) {
             $this->user->line_unfollowed = false;
             $this->user->save();
+            // ** IMPLEMENT ** //
+            // some sticker here
             return $this->pushMessage('กลับมาทำไม ฉันลืมเธอไปหมดแล้ว', $event['source']['userId']);
         } else {
             $this->bot->countFollower();
@@ -89,8 +100,16 @@ class LINEBotManager
         return $this->pushMessage($this->bot->domain->line_follow_message, $event['source']['userId']);
     }
 
+    /**
+     *
+     * Handle unfollow event
+     * @param array $event
+     * @return boolean
+     *
+     */
     protected function handleUnfollow($event)
     {
+        // check if this user is domain registred user
         if ( $this->user != null ) {
             $this->user->line_unfollowed = true;
             $this->user->save();
@@ -100,44 +119,62 @@ class LINEBotManager
         return true;
     }
 
+    /**
+     *
+     * Handle message event
+     * @param array event
+     * @return boolean
+     *
+     */
     protected function handleMessage($event)
     {
-        if ( $this->user !== null ) { // service user
-            if ( $event['message']['type'] == 'text' ) {
-                $response = $this->bot->domain->sendCallback($this->user->name, $event['message']['text']);
+        // check if this event produce by domain registered user then service
+        if ( $this->user !== null ) {
+            if ( $event['message']['type'] == 'text' ) { // NOW support ONLY text message
+                $response = $this
+                            ->bot
+                            ->domain
+                            ->sendCallback($this->user->name, $event['message']['text']);
 
                 $this->event->action_code = 1; // call back
                 $this->event->response_code = $response['code'];
-                if ( $this->event->response_code > 1 ) {
-                    return false;
-                }
-                return true;
+                return ($this->event->response_code > 1);
             }
         }
 
-        if (
+        if (    // check if non-registed user send text that may be a verification code
                 $event['message']['type'] == 'text' &&   // message-type = text
                 is_numeric($event['message']['text']) && // text = numeric
                 (strlen($event['message']['text']) == 6) // text-length = 6
            ) {
             $this->event->action_code = 4; // verification
-            if ( $this->tryVerify($event['source']['userId'], $event['message']['text']) ) {
-                return $this->replyMessage($this->bot->domain->line_greeting_message, $event['replyToken']);
+            if ( $this->verified($event['source']['userId'], $event['message']['text']) ) {
+                return $this->replyMessage(
+                    $this->bot->domain->line_greeting_message,
+                    $event['replyToken']
+                );
             }
         }
 
-        return $this->replyMessage($this->bot->domain->line_reply_unverified, $event['replyToken']);
+        // in case of non-registered user not send verify code or verify failed
+        return $this->replyMessage(
+            $this->bot->domain->line_reply_unverified,
+            $event['replyToken']
+        );
     }
 
+    /**
+     *
+     * Handle LINE bot client response
+     * @param object $response
+     * @return boolean
+     *
+     */
     protected function handleResponse(&$response)
     {
         $this->event->response_code = $response->getHTTPStatus();
 
-        if ( $this->event->response_code == 200 ) {
-            return true;
-        }
-
-        return false;
+        return ( $this->event->response_code == 200 );
     }
 
     protected function pushMessage($sms, $userId)
@@ -169,7 +206,7 @@ class LINEBotManager
         return false;
     }
 
-    protected function tryVerify($userId, $verifyCode)
+    protected function verified($userId, $verifyCode)
     {
         $user = User::where([
                         'line_user_id' => null,
