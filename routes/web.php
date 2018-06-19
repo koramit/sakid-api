@@ -42,7 +42,7 @@ $router->post('/line-verify', 'UserController@lineVerify');
 // ]);
 
 // Check if domain user is verified by LINE
-$router->post('/check-line-verify', 'UserController@checkLineVerify');
+$router->post('/check-line-verified', 'UserController@checkLineVerified');
 // $router->post('/check-line-verify', [
 //         'middleware' => 'auth',
 //         'uses' => 'UserController@checkLineVerify'

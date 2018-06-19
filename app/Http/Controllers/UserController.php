@@ -155,7 +155,7 @@ class UserController extends Controller
 
         $this->user->line_verify_code = $this->genVerifyCode();
         $this->user->save();
-        
+
         $data = $this->setCommonEmailData();
 
         // $bot = $this->user->lineBot;
@@ -168,6 +168,29 @@ class UserController extends Controller
         } else {
             return config('replycodes.error');
         }
+    }
+
+    public function checkLineVerified()
+    {
+        if ( !$this->request->has('username') ) {
+            return config('replycodes.bad');
+        }
+
+        $user = User::where([
+                        'service_domain_id' => $this->domain->id,
+                        'name' => $this->request->username
+                    ])
+                    ->first();
+
+        if ( $user == null ) {
+            return config('replycodes.no_user');
+        }
+
+        if ( $user->line_user_id == null ) {
+            return config('replycodes.unverified');
+        }
+
+        return config('replycodes.ok');
     }
 
     public function checkLineVerify()
