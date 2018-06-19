@@ -32,7 +32,7 @@ class LINEBotManager
     /**
      *
      * Handle LINE events from webhook
-     * 
+     *
     */
     public function handleEvents()
     {
@@ -53,7 +53,7 @@ class LINEBotManager
                 $httpClient = new CurlHTTPClient($this->bot->channel_access_token);
                 $this->botClient = new LINEBot($httpClient, ['channelSecret' => $this->bot->channel_secret]);
             }
-            
+
             // handle event by type
             switch ($event['type']) {
                 case 'follow':
@@ -104,8 +104,8 @@ class LINEBotManager
     {
         if ( $this->user !== null ) { // service user
             if ( $event['message']['type'] == 'text' ) {
-                $response = $this->bot->domain->sendCallback($user->name, $event['message']['text']);
-                
+                $response = $this->bot->domain->sendCallback($this->user->name, $event['message']['text']);
+
                 $this->event->action_code = 1; // call back
                 $this->event->response_code = $response['code'];
                 if ( $this->event->response_code > 1 ) {
@@ -192,7 +192,7 @@ class LINEBotManager
     public function updateUserProfile($user)
     {
         $profile = $this->getUserProfile($user->line_user_id);
-        
+
         if ( $profile === false ) {
             return false;
         }
