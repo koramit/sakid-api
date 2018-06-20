@@ -31,9 +31,12 @@ $router->post('/check-line-verified', 'UserController@checkLineVerified');
 $router->get('/mongfat', function () use ($router) {
     return App\LINEEvent::orderBy('id', 'desc')->get();
 });
-$router->get('/mongdel', function () use ($router) {
-    App\User::truncate();
-    return 'done';
+$router->get('/show-users', function () use ($router) {
+    return App\User::where('service_domian_id', 1)->get();
+});
+$router->get('/clear-user-by-id/{id}', function ($id) use ($router) {
+    App\User::where('id', $id)->delete();
+    return 'user id '  . $id .' deleted.';
 });
 
 // Domains push LINE message to they users
