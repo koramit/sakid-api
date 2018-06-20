@@ -19,8 +19,9 @@ class UserController extends Controller
     /**
      *
      * Authenticated domain only
+     * @param Illuminate\Http\Request $request
      *
-    **/
+     **/
     public function __construct(Request $request)
     {
         $this->middleware('auth');
@@ -29,14 +30,18 @@ class UserController extends Controller
         $this->domain = $this->getDomain($this->request->header());
     }
 
+    /**
+     *
+     * Validating input for email user
+     * @return
+     *
+     */
     protected function validInputsForEmail()
     {
-        // validate inputs [username, email]
-        if ( !$this->request->has('username') || !filter_var($this->request->input('email'), FILTER_VALIDATE_EMAIL)) {
-            return false;
-        }
-
-        return true;
+        return (
+            $this->request->has('username') ||
+            filter_var($this->request->input('email'), FILTER_VALIDATE_EMAIL)
+        );
     }
     /**
      *
@@ -52,6 +57,11 @@ class UserController extends Controller
         return User::insert($data);
     }
 
+    /**
+     *
+     * Set $this->user by update or new
+     *
+     */
     protected function setUser()
     {
         if ( !$this->domain->willDuplicateUser($this->request->input('username')) ) {
@@ -69,7 +79,13 @@ class UserController extends Controller
         $this->user = $user;
     }
 
-    protected function setCommonEmailData()
+    /**
+     *
+     * Set data to fill up email template
+     * @return array
+     *
+     */
+    protected function getCommonEmailData()
     {
         // prepare data for email
         $data['email_sender'] = $this->domain->email_sender;
@@ -90,7 +106,6 @@ class UserController extends Controller
     /**
      *
      * Store domain user
-     * @param  Request $request
      * @return Array
      *
     **/
@@ -123,7 +138,7 @@ class UserController extends Controller
 
         $this->setUser();
 
-        $data = $this->setCommonEmailData();
+        $data = $this->getCommonEmailData();
 
         $data['code'] = $this->genVerifyCode();
 
@@ -156,9 +171,8 @@ class UserController extends Controller
         $this->user->line_verify_code = $this->genVerifyCode();
         $this->user->save();
 
-        $data = $this->setCommonEmailData();
+        $data = $this->getCommonEmailData();
 
-        // $bot = $this->user->lineBot;
         $data['line_qrcode_url'] = $this->user->lineBot->qrcode_url;
         $data['line_verify_code'] = $this->user->line_verify_code;
 
@@ -170,6 +184,12 @@ class UserController extends Controller
         }
     }
 
+    /**
+     *
+     * Check if domain user verified by LINE
+     * @return array
+     *
+     */
     public function checkLineVerified()
     {
         if ( !$this->request->has('username') ) {
@@ -191,57 +211,5 @@ class UserController extends Controller
         }
 
         return config('replycodes.ok');
-    }
-
-    public function checkLineVerify()
-    {
-        if ( !app('request')->has('service_domain_name') || !app('request')->has('username') ) {
-            return config('replycodes.bad');
-        }
-
-        // garantee exits from middleware
-        $domain = \App\ServiceDomain::where('name', app('request')->input('service_domain_name'))->first();
-
-        $user = \App\User::where('service_domain_id', $domain->id)
-                    ->where('name', app('request')->input('username'))
-                    ->first();
-
-        if ( $user == null ) {
-            return config('replycodes.no_user');
-        }
-
-        if ( $user->line_user_id == null ) {
-            return config('replycodes.unverified');
-        }
-
-        return config('replycodes.ok');
-    }
-
-    public function lineVerify()
-    {
-        if ( !app('request')->has('service_domain_name') || !app('request')->has('username') ) {
-            return config('replycodes.bad');
-        }
-
-        $domain = \App\ServiceDomain::where('name', app('request')->input('service_domain_name'))->first();
-
-        if ( $domain->willDuplicateUser(app('request')->input('username')) ) {
-            return config('replycodes.duplicate_user');
-        }
-
-        $data = app('request')->all();
-
-        $data['name']              = app('request')->input('username');
-        $data['line_bot_id']       = $domain->assignLineBot();
-        $data['line_verify_code']  = $this->genVerifyCode();
-        $data['service_domain_id'] = $domain->id;
-
-        $user = \App\User::insert($data);
-
-        return [
-            'reply_code'       => 0,
-            'line_qrcode_url'  => $user->lineBot->getQRCodeUrl(),
-            'line_verify_code' => $data['line_verify_code'],
-        ];
     }
 }

@@ -177,6 +177,15 @@ class LINEBotManager
         return ( $this->event->response_code == 200 );
     }
 
+
+    /**
+     *
+     * Push text message to user
+     * @param string $text
+     * @param string $userId
+     * @return boolean
+     *
+     */
     protected function pushMessage($sms, $userId)
     {
         $textMessageBuilder = new TextMessageBuilder($sms);
@@ -186,6 +195,14 @@ class LINEBotManager
         return $this->handleResponse($response);
     }
 
+    /**
+     *
+     * Reply text message to user
+     * @param string $sms
+     * @param string $replyToken
+     * @return boolean
+     *
+     */
     protected function replyMessage($sms, $replyToken)
     {
         $textMessageBuilder = new TextMessageBuilder($sms);
@@ -195,6 +212,13 @@ class LINEBotManager
         return $this->handleResponse($response);
     }
 
+    /**
+     *
+     * Retrive user profile
+     * @param string $userId
+     * @return mixed
+     *
+     */
     protected function getUserProfile($userId)
     {
         $response = $this->botClient->getProfile($userId);
@@ -206,6 +230,13 @@ class LINEBotManager
         return false;
     }
 
+    /**
+     *
+     * Verifying code
+     * @param  string $userId
+     * @param  integer $verifyCode
+     * @return boolean
+     */
     protected function verified($userId, $verifyCode)
     {
         $user = User::where([
@@ -226,6 +257,13 @@ class LINEBotManager
         return $this->updateUserProfile($user);
     }
 
+    /**
+     *
+     * Update user profile
+     * @param  App\User $user
+     * @return boolean
+     *
+     */
     public function updateUserProfile($user)
     {
         $profile = $this->getUserProfile($user->line_user_id);

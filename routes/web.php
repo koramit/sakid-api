@@ -25,6 +25,9 @@ $router->post('/email-line-qrcode', 'UserController@emailLINEQRCode');
 // LINE webhook
 $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
 
+// Check if domain user is verified by LINE
+$router->post('/check-line-verified', 'UserController@checkLineVerified');
+
 $router->get('/mongfat', function () use ($router) {
     return App\LINEEvent::orderBy('id', 'desc')->get();
 });
@@ -41,8 +44,7 @@ $router->post('/line-verify', 'UserController@lineVerify');
 //         'uses' => 'UserController@lineVerify'
 // ]);
 
-// Check if domain user is verified by LINE
-$router->post('/check-line-verified', 'UserController@checkLineVerified');
+
 // $router->post('/check-line-verify', [
 //         'middleware' => 'auth',
 //         'uses' => 'UserController@checkLineVerify'
