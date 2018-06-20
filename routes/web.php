@@ -33,22 +33,8 @@ $router->get('/mongfat', function () use ($router) {
 });
 $router->get('/mongdel', function () use ($router) {
     App\User::truncate();
-    App\LINEWebhook::truncate();
     return 'done';
 });
-
-// Verify domain user by LINE
-$router->post('/line-verify', 'UserController@lineVerify');
-// $router->post('/line-verify', [
-//         'middleware' => 'auth',
-//         'uses' => 'UserController@lineVerify'
-// ]);
-
-
-// $router->post('/check-line-verify', [
-//         'middleware' => 'auth',
-//         'uses' => 'UserController@checkLineVerify'
-// ]);
 
 // Domains push LINE message to they users
 $router->post('/message/{platform}/push/{pushType}', 'MessagingController@pushMessage');
@@ -57,11 +43,4 @@ $router->post('/message/{platform}/push/{pushType}', 'MessagingController@pushMe
 //         'uses' => 'MessagingController@pushMessage'
 // ]);
 
-$router->get('headers', function () {
-    return app('request')->header();
-});
-
 $router->get('logs', 'SecuredLogViewerController@index');
-
-// new callback
-// $router->post('/{platform}/{botId}', 'BotEventsController@handle');
