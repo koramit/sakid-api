@@ -5,7 +5,7 @@ namespace App;
 use Exception;
 use LINE\LINEBot;
 use App\LINEEvent;
-use Ap\SAKIDLineBot;
+use App\SAKIDLineBot;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
 
