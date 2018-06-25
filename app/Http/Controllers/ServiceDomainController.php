@@ -35,7 +35,7 @@ class ServiceDomainController extends Controller
 
     public function update(Request $request)
     {
-        $domain = ServiceDomain::find($request->service_domain_id);
+        $domain = ServiceDomain::find($request->input('service_domain_id'));
         if ($domain->update($request->all())) {
             return config('replycodes.ok');
         }
