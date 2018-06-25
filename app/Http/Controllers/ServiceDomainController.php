@@ -32,4 +32,13 @@ class ServiceDomainController extends Controller
 
         return config('replycodes.ok') + ['token' => $data['token']];
     }
+
+    public function update(Request $request)
+    {
+        $domain = ServiceDomain::find($request->service_domain_id);
+        if ($domain->update($request->all())) {
+            return config('replycodes.ok');
+        }
+        return config('replycodes.error');
+    }
 }

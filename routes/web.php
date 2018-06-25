@@ -10,6 +10,9 @@ $router->get('/', function () use ($router) {
 // Create service domian
 $router->post('/service-domain', 'ServiceDomainController@store');
 
+// Update service domian
+$router->post('/service-domain-update', 'ServiceDomainController@update');
+
 // Create domain user
 $router->post('/register-user', 'UserController@store');
 
