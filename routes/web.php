@@ -25,11 +25,15 @@ $router->post('/line-bot', 'SAKIDLineBotController@store');
 // Email LINE QRCode
 $router->post('/email-line-qrcode', 'UserController@emailLINEQRCode');
 
+// Check if domain user is verified by LINE
+$router->post('/check-line-verified', 'UserController@checkLineVerified');
+
 // LINE webhook
 $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
 
-// Check if domain user is verified by LINE
-$router->post('/check-line-verified', 'UserController@checkLineVerified');
+// LINE messaging
+$router->post('/line-messaging', 'UserController@lineMessaging');
+
 
 $router->get('/mongfat', function () use ($router) {
     return App\LINEEvent::orderBy('id', 'desc')->get();
@@ -41,6 +45,8 @@ $router->get('/clear-user-by-id/{id}', function ($id) use ($router) {
     App\User::where('id', $id)->delete();
     return 'user id '  . $id .' deleted.';
 });
+
+
 
 // Domains push LINE message to they users
 $router->post('/message/{platform}/push/{pushType}', 'MessagingController@pushMessage');

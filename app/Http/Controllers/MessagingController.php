@@ -2,12 +2,91 @@
 
 namespace App\Http\Controllers;
 
+use LINE\LINEBot;
+use Illuminate\Http\Request;
+use App\Traits\DomainAuthenticable;
+use LINE\LINEBot\HTTPClient\CurlHTTPClient;
+use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
+use LINE\LINEBot\MessageBuilder\StickerMessageBuilder;
+
 class MessagingController extends Controller
 {
+    use DomainAuthenticable;
+
+    protected $request;
+    protected $domain;
+
+    /**
+     *
+     * Authenticated domain only
+     * @param Illuminate\Http\Request $request
+     *
+     **/
     public function __construct()
     {
         $this->middleware('auth');
+
+        $this->request = $request;
+        $this->domain = $this->getDomain($this->request->header());
     }
+
+    protected function lineMessageBuilder()
+    {
+        if ( !$this->request->has('type') ) {
+            return null;
+        }
+
+        if ( $this->request->input('type') == 'text' ) {
+            if ( !$this->request->has('text') ) {
+                return null;
+            }
+            return new TextMessageBuilder($this->request->input('text'));
+
+        } elseif ( $this->request->input('type') == 'sticker' ) {
+            if ( !$this->request->has('package_id') || !$this->request->has('sticker_id') ) {
+                return null;
+            }
+            return new StickerMessageBuilder(
+                $this->request->input('package_id'),
+                $this->request->input('sticker_id')
+            );
+        } else {
+            return null;
+        }
+    }
+
+    public function lineMessaging()
+    {
+        if (!$this->request->has('username')) {
+            return config('replycodes.bad');
+        }
+
+        $user = $this->domain->findUser($this->request->input('username'));
+        $bot = new LINEBot(
+                    new CurlHTTPClient($user->lineBot->channel_access_token),
+                    ['channelSecret' => $user->lineBot->channel_secret]
+               );
+
+        $isReply = $this->request->has('reply_token');
+
+        $message = $this->lineMessageBuilder();
+        if ( $message === null ) {
+            return config('replycodes.bad');
+        }
+
+        if ( $isReply ) {
+            $response = $bot->replyMessage($this->request->input('reply_token'), $message);
+        } else {
+            $response = $bot->pushMessage($user->line_user_id, $message);
+        }
+
+        if ( $response->getHTTPStatus() == 200 ) {
+            return config('replycodes.ok');
+        }
+
+        return config('replycodes.error');
+    }
+
     /**
      * Push message to the platform provider.
      *
