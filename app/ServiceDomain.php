@@ -75,13 +75,13 @@ class ServiceDomain extends Model implements AutoId
         $bot = SAKIDLineBot::where('service_domain_id', $this->id)
                        ->orderBy('qrcode_sent_count')
                        ->first();
-                       
+
         $bot->countSent();
 
         return $bot->id;
     }
-    
-    public function sendCallback($username, $text)
+
+    public function sendCallback($username, $text, $replyToken)
     {
         if ( $this->callback_url != null ) {
             $url = parse_url($this->callback_url);
@@ -98,7 +98,8 @@ class ServiceDomain extends Model implements AutoId
                 'form_params' => [
                     'platform' => 'line',
                     'username' => $username,
-                    'text' => $text
+                    'text' => $text,
+                    'reply_token' => $replyToken
                 ]
             ]);
 

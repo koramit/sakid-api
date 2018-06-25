@@ -134,7 +134,11 @@ class LINEBotManager
                 $response = $this
                             ->bot
                             ->domain
-                            ->sendCallback($this->user->name, $event['message']['text']);
+                            ->sendCallback(
+                                $this->user->name,
+                                $event['message']['text'],
+                                $event['replyToken']
+                            );
 
                 $this->event->action_code = 1; // call back
                 $this->event->response_code = $response['code'];
