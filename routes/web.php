@@ -32,7 +32,7 @@ $router->post('/check-line-verified', 'UserController@checkLineVerified');
 $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook');
 
 // LINE messaging
-$router->post('/line-messaging', 'UserController@lineMessaging');
+$router->post('/line-messaging', 'MessagingController@lineMessaging');
 
 
 $router->get('/mongfat', function () use ($router) {
