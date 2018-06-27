@@ -42,8 +42,17 @@ $router->get('/show-users', function () use ($router) {
     return App\User::where('service_domain_id', 1)->get();
 });
 $router->get('/clear-user-by-id/{id}', function ($id) use ($router) {
+    $user = App\User::find($id);
+    
+    if ( $user === null ) {
+        return 'user not found.';
+    }
+
     App\User::where('id', $id)->delete();
-    return 'user id '  . $id .' deleted.';
+
+    App\User::create(['id' => $user->id, 'name' => $user->name]);
+
+    return 'user id '  . $id .' was cleared.';
 });
 
 
