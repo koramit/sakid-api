@@ -2,11 +2,11 @@
 
 namespace App;
 
-use App\Contracts\AutoId;
-use App\SAKIDLineBot;
-use App\Traits\AutoIdInsertable;
-use App\Traits\DataCryptable;
 use App\User;
+use App\SAKIDLineBot;
+use App\Contracts\AutoId;
+use App\Traits\DataCryptable;
+use App\Traits\AutoIdInsertable;
 use Illuminate\Database\Eloquent\Model;
 
 class ServiceDomain extends Model implements AutoId

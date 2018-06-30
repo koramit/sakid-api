@@ -142,7 +142,7 @@ class LINEBotManager
 
                 $this->event->action_code = 1; // call back
                 $this->event->response_code = $response['code'];
-                return ($this->event->response_code > 1);
+                return ($this->event->response_code == 1);
             }
         }
 
