@@ -38,22 +38,22 @@ $router->post('/line-messaging', 'MessagingController@lineMessaging');
 $router->get('/mongfat', function () use ($router) {
     return App\LINEEvent::orderBy('id', 'desc')->get();
 });
-$router->get('/show-users', function () use ($router) {
-    return App\User::where('service_domain_id', 1)->get();
-});
-$router->get('/clear-user-by-id/{id}', function ($id) use ($router) {
-    $user = App\User::find($id);
+// $router->get('/show-users', function () use ($router) {
+//     return App\User::where('service_domain_id', 1)->get();
+// });
+// $router->get('/clear-user-by-id/{id}', function ($id) use ($router) {
+//     $user = App\User::find($id);
     
-    if ( $user === null ) {
-        return 'user not found.';
-    }
+//     if ( $user === null ) {
+//         return 'user not found.';
+//     }
 
-    App\User::where('id', $id)->delete();
+//     App\User::where('id', $id)->delete();
 
-    App\User::create(['id' => $user->id, 'service_domain_id' => 1, 'name' => $user->name]);
+//     App\User::create(['id' => $user->id, 'service_domain_id' => 1, 'name' => $user->name]);
 
-    return 'user id '  . $id .' was cleared.';
-});
+//     return 'user id '  . $id .' was cleared.';
+// });
 
 
 
