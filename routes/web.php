@@ -16,6 +16,9 @@ $router->post('/service-domain-update', 'ServiceDomainController@update');
 // Create domain user
 $router->post('/register-user', 'UserController@store');
 
+// Create domain user
+$router->post('/delete-user', 'UserController@destroy');
+
 // Email verify code
 $router->post('/email-verify-code', 'UserController@emailVerifyCode');
 

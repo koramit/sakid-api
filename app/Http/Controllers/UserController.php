@@ -70,7 +70,8 @@ class UserController extends Controller
             $user = User::where('service_domain_id', $this->domain->id)
                         ->where('name', $this->request->input('username'))
                         ->first();
-            if ( $user->email !== $this->request->input('email') ) {
+            
+            if ( $this->request->has('email') && $user->email !== $this->request->input('email') ) {
                 $user->email = $this->request->input('email');
                 $user->save();
             }
@@ -120,6 +121,25 @@ class UserController extends Controller
         }
 
         $user = $this->insertUser();
+
+        return config('replycodes.ok');
+    }
+
+    /**
+     *
+     * Delete domain user
+     * @return Array
+     *
+    **/
+    public function destroy()
+    {
+        if ( !$this->request->has('username') ) {
+            return config('replycodes.bad');
+        }
+
+        $this->setUser();
+
+        $this->user->delete();
 
         return config('replycodes.ok');
     }
