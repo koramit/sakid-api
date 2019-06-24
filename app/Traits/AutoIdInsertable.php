@@ -16,7 +16,7 @@ trait AutoIdInsertable
     {
         switch (static::getIdType()) {
             case 'id':
-                $data['id'] = static::count() + 1;
+                $data['id'] = static::max('id') + 1;
                 break;
             case 'time_based_uuid':
                 $data['id'] = Uuid::uuid1()->toString();
