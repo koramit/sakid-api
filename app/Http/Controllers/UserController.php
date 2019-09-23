@@ -235,10 +235,7 @@ class UserController extends Controller
 
     public function updateLineProfile($domainName, $username)
     {
-        $domain = \App\ServiceDomain::whereName($domianName)->first();
-        if (!$domian) return "";
-
-        $user = User::whereServiceDomainId($domain->id)->whereName($username)->first();
+        $user = User::whereServiceDomainId($domain->id)->whereName($this->request->username)->first();
         if (!$user) return "";
 
         return $user;

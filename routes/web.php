@@ -38,7 +38,7 @@ $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook
 $router->post('/line-messaging', 'MessagingController@lineMessaging');
 
 // TEST UPDATE PROFILE
-$router->get('/update-user-profile/{domainName}/{username}', 'UserController@updateLineProfile');
+$router->get('/update-user-profile', 'UserController@updateLineProfile');
 
 
 $router->get('/mongfat', function () use ($router) {
