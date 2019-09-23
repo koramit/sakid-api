@@ -237,18 +237,25 @@ class UserController extends Controller
     {
         $user = User::whereServiceDomainId($this->domain->id)->whereName($this->request->username)->first();
         if (!$user) return "";
-
-        // return $user->lineBot;
         
         $httpClient = new \LINE\LINEBot\HTTPClient\CurlHTTPClient($user->lineBot->channel_access_token);
         $botClient = new \LINE\LINEBot($httpClient, ['channelSecret' => $user->lineBot->channel_secret]);
 
         $response = $botClient->getProfile($user->line_user_id);
-        if ($response->isSucceeded()) {
-            $profile = $response->getJSONDecodedBody();
-            return $profile;
+        if (!$response->isSucceeded()) return "fail";
+
+        $profile = $response->getJSONDecodedBody();
+
+        if (array_key_exists('displayName', $profile)) {
+            $user->line_display_name = $profile['displayName'];
+        }
+        if (array_key_exists('pictureUrl', $profile)) {
+            $user->line_picture_url = $profile['pictureUrl'];
+        }
+        if (array_key_exists('statusMessage', $profile)) {
+            $user->line_status_message = $profile['statusMessage'];
         }
 
-        return "fail";
+        return $user->save() ? $profile : 'error';
     }
 }
