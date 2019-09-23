@@ -238,6 +238,17 @@ class UserController extends Controller
         $user = User::whereServiceDomainId($this->domain->id)->whereName($this->request->username)->first();
         if (!$user) return "";
 
-        return $user;
+        // return $user;
+        
+        $httpClient = new \LINE\LINEBot\HTTPClient\CurlHTTPClient($user->lineBot->channel_access_token);
+        $botClient = new \LINE\LINEBot($httpClient, ['channelSecret' => $user->lineBot->channel_secret]);
+
+        $response = $botClient->getProfile($user->id);
+        if ($response->isSucceeded()) {
+            $profile = $response->getJSONDecodedBody();
+            return $profile;
+        }
+
+        return false;
     }
 }
