@@ -38,7 +38,7 @@ $router->post('/line-bot-webhook/{botId}', 'SAKIDLineBotController@handleWebhook
 $router->post('/line-messaging', 'MessagingController@lineMessaging');
 
 // TEST UPDATE PROFILE
-$router->get('/update-user-profile/{domainName}/{username}', function ($domainName, $username) {
+$router->get('/update-user-profile/{domainName}/{username}', function ($domainName, $username) use ($router) {
     $domain = \App\ServiceDomain::whereName($domianName)->first();
     if (!$domian) return "";
 
