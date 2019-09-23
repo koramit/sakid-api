@@ -233,9 +233,9 @@ class UserController extends Controller
         return config('replycodes.ok');
     }
 
-    public function updateLineProfile($domainName, $username)
+    public function updateLineProfile()
     {
-        $user = User::whereServiceDomainId($domain->id)->whereName($this->request->username)->first();
+        $user = User::whereServiceDomainId($this->domain->id)->whereName($this->request->username)->first();
         if (!$user) return "";
 
         return $user;
