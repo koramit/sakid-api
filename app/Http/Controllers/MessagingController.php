@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use App\Traits\DomainAuthenticable;
 use LINE\LINEBot\HTTPClient\CurlHTTPClient;
 use LINE\LINEBot\MessageBuilder\TextMessageBuilder;
+use LINE\LINEBot\MessageBuilder\ImageMessageBuilder;
 use LINE\LINEBot\MessageBuilder\StickerMessageBuilder;
+use LINE\LINEBot\MessageBuilder\LocationMessageBuilder;
 
 class MessagingController extends Controller
 {
@@ -49,6 +51,29 @@ class MessagingController extends Controller
             return new StickerMessageBuilder(
                 $this->request->input('package_id'),
                 $this->request->input('sticker_id')
+            );
+        } elseif ($this->request->input('type') == 'image') {
+            if ( !$this->request->has('original_url') || !$this->request->has('preview_url') ) {
+                return null;
+            }
+            return new ImageMessageBuilder(
+                $this->request->input('original_url'),
+                $this->request->input('preview_url')
+            );
+        } elseif ($this->request->input('type') == 'location') {
+            if ( 
+                !$this->request->has('title') || 
+                !$this->request->has('address') || 
+                !$this->request->has('latitude') || 
+                !$this->request->has('longitude') 
+            ) {
+                return null;
+            }
+            return new LocationMessageBuilder(
+                $this->request->has('title'),
+                $this->request->has('address'),
+                $this->request->has('latitude'),
+                $this->request->has('longitude') 
             );
         } else {
             return null;
