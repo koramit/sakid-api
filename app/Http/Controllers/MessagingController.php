@@ -109,6 +109,8 @@ class MessagingController extends Controller
             return config('replycodes.ok');
         }
 
+        return config('replycodes.error') + ['response_status' => $response->getHTTPStatus()];
+
         return config('replycodes.error');
     }
 
