@@ -69,13 +69,12 @@ class MessagingController extends Controller
             ) {
                 return null;
             }
-            return new LocationMessageBuilder('หอกีฬาศิริราชสัมพันธ์', 'Siriraj Hospital 2 ถนนวังหลัง Bangkok Noi Bangkok 10700 Thailand', 13.759331, 100.485425);
-            // return new LocationMessageBuilder(
-            //     $this->request->has('title'),
-            //     $this->request->has('address'),
-            //     $this->request->has('latitude'),
-            //     $this->request->has('longitude') 
-            // );
+            return new LocationMessageBuilder(
+                $this->request->input('title'),
+                $this->request->input('address'),
+                $this->request->input('latitude'),
+                $this->request->input('longitude') 
+            );
         } else {
             return null;
         }
