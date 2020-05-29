@@ -87,6 +87,11 @@ class MessagingController extends Controller
         }
 
         $user = $this->domain->findUser($this->request->input('username'));
+
+        if (!$user) {
+            return config('replycodes.bad');
+        }
+
         $bot = new LINEBot(
                     new CurlHTTPClient($user->lineBot->channel_access_token),
                     ['channelSecret' => $user->lineBot->channel_secret]
