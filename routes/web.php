@@ -1,8 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Filesystem\Cache;
-
 $router->get('/', function () use ($router) {
     return 'sakid-bot V 0.0.1 powered by lullabears.co';
 });
@@ -40,7 +37,6 @@ $router->post('/line-messaging', 'MessagingController@lineMessaging');
 // TEST UPDATE PROFILE
 $router->post('/update-user-profile', 'UserController@updateLineProfile');
 
-
 $router->get('/mongfat', function () use ($router) {
     return App\LINEEvent::orderBy('id', 'desc')->get();
 });
@@ -49,7 +45,7 @@ $router->get('/mongfat', function () use ($router) {
 // });
 // $router->get('/clear-user-by-id/{id}', function ($id) use ($router) {
 //     $user = App\User::find($id);
-    
+
 //     if ( $user === null ) {
 //         return 'user not found.';
 //     }
@@ -61,8 +57,6 @@ $router->get('/mongfat', function () use ($router) {
 //     return 'user id '  . $id .' was cleared.';
 // });
 
-
-
 // Domains push LINE message to they users
 $router->post('/message/{platform}/push/{pushType}', 'MessagingController@pushMessage');
 // $router->post('/message/{platform}/push/{pushType}', [
@@ -71,3 +65,9 @@ $router->post('/message/{platform}/push/{pushType}', 'MessagingController@pushMe
 // ]);
 
 $router->get('logs', 'SecuredLogViewerController@index');
+
+$router->post('/checkup', function () use ($router) {
+    return [
+        'foo' => 'bar',
+    ];
+});
