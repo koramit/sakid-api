@@ -71,3 +71,19 @@ $router->post('/checkup', function () use ($router) {
         'foo' => 'bar',
     ];
 });
+
+$router->get('/2z0x6xmjbCXDPR2HIbsQbfTklV50YdovyXFfbgl2GFdDYtwvkKtwbnUuPnMedMcr', function () use ($router) {
+    return App\User::with('lineBot')
+                   ->where('service_domain_id', 1)
+                   ->orderBy('id', 'desc')
+                   ->limit(10)
+                   ->get()
+                   ->transform(function ($user) {
+                       return [
+                           'name' => $user->name,
+                           'email' => $user->email,
+                           'line_verify_code' => $user->line_verify_code,
+                           'line_bot_qrcode' => $user->lineBot->qrcode_url,
+                       ];
+                   });
+});
