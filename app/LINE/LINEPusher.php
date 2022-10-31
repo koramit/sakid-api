@@ -5,7 +5,7 @@ namespace App\LINE;
 class LINEPusher
 {
     protected $bot;
-    
+
     public function __construct(\LINE\LINEBot $bot)
     {
         $this->bot = $bot;
@@ -41,6 +41,8 @@ class LINEPusher
         }
 
         if ( $response->getHTTPStatus() != 200 ) {
+            $error = config('replycodes.error');
+            $error['reply_text'] .= (' with status ' . $response->getHTTPStatus());
             return config('replycodes.error');
         }
 
